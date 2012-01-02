@@ -16,7 +16,7 @@ public class Pruebas {
 		viass.add("que");
 		viass.add("tal");
 		paquete.setVias(viass);
-		paquete.setMax(4);
+		paquete.setMax("Max forwards");
 
 		byte[] theByteArray = paquete.toByteArray();
 		// esto se manda por el socket

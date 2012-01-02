@@ -1,0 +1,78 @@
+package paqueteSIP;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+class Servidor {
+
+	public Servidor(String puertoescuchaProxy) throws Exception {
+
+		try {
+			Vector<String> lineas = new Vector<String>(15,2);
+			//Creamos un nuevo mensajeSIP y un ArrayList de viasTemporales
+			MensajeSIP mensaje = new MensajeSIP();
+			ArrayList<String> viasTemp = new ArrayList<String>();
+			
+			//Pasamos el mensaje a un ByteArray
+			byte[] mensaByteArray = mensaje.toByteArray();
+		
+			DatagramPacket dgp = new DatagramPacket(mensaByteArray, mensaByteArray.length);
+			DatagramSocket sk = new DatagramSocket(Integer.parseInt(puertoescuchaProxy));;
+			System.out.println("Server started");
+			
+			while (true) {
+				sk.receive(dgp);
+				
+				String mensaString = new String(mensaByteArray);
+				StringTokenizer mensaTokenizado = new StringTokenizer(mensaString, "\n");
+				while (mensaTokenizado.hasMoreTokens()) {
+					lineas.add(mensaTokenizado.nextToken());
+				}
+				for (Integer i=0; i<lineas.capacity(); i++ ){
+					System.out.println(lineas.elementAt(i));
+				}
+				mensaje.setTipoOperacion("REGISTER sip:registrar.dominio.com SIP/2.0");
+				
+				viasTemp.add("Via: SIP/2.0/UDP nacho.dominio.com:5040"); mensaje.setVias(viasTemp);
+				mensaje.setMax("Max-Forwards: 70");
+				
+				mensaje.setTipoOperacion(mensaTokenizado.nextToken());
+				while (mensaTokenizado.hasMoreTokens()) {
+					
+					System.out.println(mensaTokenizado.nextToken());
+				}
+				
+				String rcvd = new String("\n\n -- desde la IP: " + dgp.getAddress() + ", con el puerto: " + dgp.getPort());
+				System.out.println(rcvd);
+
+				BufferedReader stdin = new BufferedReader(
+						new InputStreamReader(System.in));
+				String outMessage = stdin.readLine();
+				mensaByteArray = ("Server say: " + outMessage).getBytes();
+				DatagramPacket out = new DatagramPacket(mensaByteArray, mensaByteArray.length,
+						dgp.getAddress(), dgp.getPort());
+				sk. send(out);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void main(String[] args) {
+		try {
+
+			String puertoescuchaProxy = args[0];
+			new Servidor(puertoescuchaProxy);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Error, vuelva a ejecutarlo metiendo el puerto de escucha del Proxy");
+		}
+	}
+
+}

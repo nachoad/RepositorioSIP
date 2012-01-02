@@ -1,0 +1,63 @@
+package paqueteSIP;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.StringTokenizer;
+
+class Servidor {
+
+	public Servidor(String puertoescuchaProxy) throws Exception {
+
+		try {
+			//Creamos un nuevo mensajeSIP
+			MensajeSIP mensaje = new MensajeSIP();
+			
+			//Pasamos el mensaje a un ByteArray
+			byte[] mensaByteArray = mensaje.toByteArray();
+		
+			DatagramPacket dgp = new DatagramPacket(mensaByteArray, mensaByteArray.length);
+			DatagramSocket sk = new DatagramSocket(Integer.parseInt(puertoescuchaProxy));;
+			System.out.println("Server started");
+			
+			while (true) {
+				sk.receive(dgp);
+				
+				String mensaString = new String(mensaByteArray);
+				StringTokenizer mensaTokenizado = new StringTokenizer(mensaString, "\n");
+
+				while (mensaTokenizado.hasMoreTokens()) {
+					
+					System.out.println(mensaTokenizado.nextToken());
+				}
+				
+				String rcvd = new String("\n\n -- desde la IP: " + dgp.getAddress() + ", con el puerto: " + dgp.getPort());
+				System.out.println(rcvd);
+
+				BufferedReader stdin = new BufferedReader(
+						new InputStreamReader(System.in));
+				String outMessage = stdin.readLine();
+				mensaByteArray = ("Server say: " + outMessage).getBytes();
+				DatagramPacket out = new DatagramPacket(mensaByteArray, mensaByteArray.length,
+						dgp.getAddress(), dgp.getPort());
+				sk. send(out);
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+
+	public static void main(String[] args) {
+		try {
+
+			String puertoescuchaProxy = args[0];
+			new Servidor(puertoescuchaProxy);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.out.println("Error, vuelva a ejecutarlo metiendo el puerto de escucha del Proxy");
+		}
+	}
+
+}
