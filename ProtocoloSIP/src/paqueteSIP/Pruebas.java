@@ -8,8 +8,8 @@ public class Pruebas {
 	 * This method converts a String to an array of bytes
 	 */
 	public void set() {
-		MensajeSIP paquete = new MensajeSIP();
-		paquete.setTipoOperacion("tipoOperacion");
+		MensajeREG paquete = new MensajeREG();
+		paquete.setTipoOp("tipoOperacion");
 
 		ArrayList<String> viass = new ArrayList<String>();
 		viass.add("hola");
@@ -32,7 +32,7 @@ public class Pruebas {
 		}
 
 		// setear valores del toquen en el paqueteRespuesta
-		// accedo a la variable así
+		// accedo a la variable as’
 		// paquete.getTipoOperacion();
 		//
 
